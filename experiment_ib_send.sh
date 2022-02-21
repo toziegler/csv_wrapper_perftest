@@ -3,9 +3,11 @@ device="null"
 client=0
 server=0
 server_ip=null
-
+fabric="null"
+protocol="null"
 
 NUMBER_RUNS=3
+NUMBER_ITERATIONS= 100000
 
 help(){
     echo "Usage:  TODO " >&2
@@ -30,15 +32,16 @@ run_experiment(){
 
 server(){
     sleep=1
-    run_experiment "numactl --cpubind=0 ib_send_lat -a  -d ${device} -n 100000 -R -F --perform_warm_up" $sleep # latency
+    run_experiment "numactl --cpubind=0 ib_send_lat -a  -d ${device} -n ${NUMBER_ITERATIONS} -R -F --perform_warm_up -c ${protocol}" $sleep # latency
     exit 1
 }
 
 client(){
     sleep=3 # ensures that server starts before client
-    run_experiment "bash wrapper_ib_send_lat.sh "
-    # latency
+    # latency 
+    run_experiment "bash wrapper_ib_send_lat.sh -e latency -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric}" $sleep
     # latency inline
+    run_experiment "bash wrapper_ib_send_lat.sh -e latency -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -i 220" $sleep
     # bw 1 1
     # tx depth
     # cq moderation
@@ -48,11 +51,13 @@ client(){
 
 main(){
     #--------------------------------------------------        
-    while getopts d:a:sch flag
+    while getopts d:a:f:p:sch flag
     do
         case "${flag}" in
             d) device=${OPTARG};;
+            p) protocol=${OPTARG};;
             a) server_ip=${OPTARG};;
+            f) fabric=${OPTARG};;
             s) server=1;;
             c) client=1;;
             h) ;&
@@ -70,6 +75,8 @@ main(){
     echo "device: $device";
     echo "server: $server";
     echo "client: $client";
+    echo "fabric: $fabric";
+    echo "protocol: $protocol";
     #--------------------------------------------------
     # client
     if [[ "$client" == 1 ]]; then
