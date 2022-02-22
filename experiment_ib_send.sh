@@ -9,6 +9,9 @@ protocol="null"
 NUMBER_RUNS=3
 NUMBER_ITERATIONS=50000
 
+TX_DEPTHS=( 1 2 4 8 16 32 64 128 256 512 1024)
+CQ_MODS=( 1 2 4 8 16 32 64 128 256 512 1024)
+
 help(){
     echo "Usage:  TODO " >&2
     echo
@@ -32,22 +35,48 @@ run_experiment(){
 
 server(){
     sleep=1
-    # latency 
-    run_experiment "numactl --cpubind=0 ./perftest/ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F --perform_warm_up -c ${protocol}" $sleep # latency
-    # latency inline
-    run_experiment "numactl --cpubind=0 ./perftest/ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F --perform_warm_up -c ${protocol}" $sleep # latency
+
+    # # latency 
+    # run_experiment "numactl --cpubind=0 ./perftest/ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F --perform_warm_up -c ${protocol}" $sleep # latency
+
+    # # latency inline
+    # run_experiment "numactl --cpubind=0 ./perftest/ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F --perform_warm_up -c ${protocol}" $sleep # latency
+
+    # sync bw 
+    run_experiment "numactl --cpubind=0 ./perftest/ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F -c ${protocol}" $sleep # bw
+
+    # increase the number of outstanding I/Os
+    for i in "${TX_DEPTHS[@]}"
+    do
+	    echo "tx depth $i"
+        run_experiment "numactl --cpubind=0 ./perftest/ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F -c ${protocol}" $sleep # bw
+    done
+    
+    # decrease the number of completion events take maximum number of tx completions
+
+    # run experiment with multiple queues 
+    
     exit 1
 }
 
 client(){
     sleep=3 # ensures that server starts before client
-    # latency 
-    run_experiment "bash wrapper_ib_send_lat.sh -e latency -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric}" $sleep
-    # latency inline
-    run_experiment "bash wrapper_ib_send_lat.sh -e latency_inline -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -i 220" $sleep
+
+    # # latency 
+    # run_experiment "bash wrapper_ib_send_lat.sh -e latency -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric}" $sleep
+
+    # # latency inline
+    # run_experiment "bash wrapper_ib_send_lat.sh -e latency_inline -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -i 220" $sleep
+
     # bw 1 1
     run_experiment "bash wrapper_ib_send_bw.sh -e bw_sync -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 1 - m 1 -l 1 -q 1" $sleep
+
     # tx depth
+    for i in "${TX_DEPTHS[@]}"
+    do
+	    echo "tx depth $i"
+        run_experiment "bash wrapper_ib_send_bw.sh -e bw_sync -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t ${i} - m 1 -l 1 -q 1" $sleep
+    done
     # cq moderation
     # multiple queues 
     exit 1
