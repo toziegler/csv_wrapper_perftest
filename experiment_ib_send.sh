@@ -7,7 +7,7 @@ fabric="null"
 protocol="null"
 
 NUMBER_RUNS=3
-NUMBER_ITERATIONS= 100000
+NUMBER_ITERATIONS=50000
 
 help(){
     echo "Usage:  TODO " >&2
@@ -23,16 +23,16 @@ run_experiment(){
     for ((c=0; c<${NUMBER_RUNS}; c++))
     do
         echo "RUN $c"
+        echo "$1"
         $1
         sleep $2
-        
     done
     
 }
 
 server(){
     sleep=1
-    run_experiment "numactl --cpubind=0 ib_send_lat -a  -d ${device} -n ${NUMBER_ITERATIONS} -R -F --perform_warm_up -c ${protocol}" $sleep # latency
+    run_experiment "numactl --cpubind=0 ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F --perform_warm_up -c ${protocol}" $sleep # latency
     exit 1
 }
 
