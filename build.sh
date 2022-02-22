@@ -6,3 +6,4 @@ cd perftest
 ./configure
 make -j
 cd ..
+mkdir csv
