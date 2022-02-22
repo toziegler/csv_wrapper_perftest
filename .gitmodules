@@ -1,3 +1,4 @@
 [submodule "perftest"]
 	path = perftest
 	url = git@github.com:toziegler/perftest.git
+	ignore = dirty
