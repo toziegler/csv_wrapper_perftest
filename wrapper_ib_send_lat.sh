@@ -45,6 +45,8 @@ client(){
     else
         echo "experiment,measurement,device,protocol,inline,iters,server,client,bytes,iterations,min,max,typical,avg,stddev,99percentile,999percentile" | tee -a $FILE
     fi
+
+    echo "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_lat  -d ${device} -a -n ${number_iterations} ${ADDITIONAL_FLAGS[${fabric}]} -F -I ${inline_size} -c ${protocol} ${server_ip} --perform_warm_up"
     
     numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_lat  -d ${device} -a -n ${number_iterations} ${ADDITIONAL_FLAGS[${fabric}]} -F -I ${inline_size} -c ${protocol} ${server_ip} --perform_warm_up | grep -v "^ local" | grep -v "^ remote" | tail -n ${LINES[${fabric}]} |sed 's/\s\+/,/g' | sed 's/-\+//g' | sed "s/^/${experiment},lat,${device},${protocol},${inline_size},${number_iterations},${server},${client}/" | head -n -1 | tee -a $FILE
     exit 1

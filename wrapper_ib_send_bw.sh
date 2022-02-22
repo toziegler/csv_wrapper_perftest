@@ -51,6 +51,8 @@ client(){
     else
         echo "experiment,measurement,device,protocol,txdepth,rxdepth,cqmoderation,postlist,numberqps,inline,iters,server,client,bytes,iterations,bwpeak,bwavg,msgrate" | tee -a $FILE
     fi
+
+    echo "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw  -d ${device} -a -n ${number_iterations} ${ADDITIONAL_FLAGS[${fabric}]} -F -t ${tx_depth} -Q ${cq_moderation} -q ${number_qp} -l ${post_list} -I ${inline_size} -c ${protocol} ${server_ip}"
     
     numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw  -d ${device} -a -n ${number_iterations} ${ADDITIONAL_FLAGS[${fabric}]} -F -t ${tx_depth} -Q ${cq_moderation} -q ${number_qp} -l ${post_list} -I ${inline_size} -c ${protocol} ${server_ip} | grep -v "^ local" | grep -v "^ remote" | tail -n ${LINES[${fabric}]} |sed 's/\s\+/,/g' | sed 's/-\+//g' | sed "s/^/${experiment},bw,${device},${protocol},${tx_depth},${rx_depth},${cq_moderation},${post_list},${number_qp},${inline_size},${number_iterations},${server},${client}/" | head -n -1 | tee -a $FILE    
     exit 1
