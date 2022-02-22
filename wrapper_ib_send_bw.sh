@@ -35,7 +35,7 @@ server(){
         echo "experiment,measurement,device,protocol,txdepth,rxdepth,cqmoderation,postlist,numberqps,inline,iters,server,client,bytes,iterations,bwpeak,bwavg,msgrate" | tee -a bw_benchmark.csv
     fi
 
-    numactl --cpubind=0 ib_send_bw  -d ${device} -a -n ${number_iterations} -R -F -r ${rx_depth} -Q ${cq_moderation} -q ${number_qp} -l ${post_list} -I ${inline_size} | grep -v "^ local" | grep -v "^ remote" | tail -n +20 |sed 's/\s\+/,/g' | sed 's/-\+//g' | sed "s/^/${experiment},bw,${device},${protocol},${tx_depth},${rx_depth},${cq_moderation},${post_list},${number_qp},${inline_size},${number_iterations},${server},${client}/" | head -n -1      
+    numactl --cpubind=0 ./perftest/ib_send_bw  -d ${device} -a -n ${number_iterations} -R -F -r ${rx_depth} -Q ${cq_moderation} -q ${number_qp} -l ${post_list} -I ${inline_size} | grep -v "^ local" | grep -v "^ remote" | tail -n +20 |sed 's/\s\+/,/g' | sed 's/-\+//g' | sed "s/^/${experiment},bw,${device},${protocol},${tx_depth},${rx_depth},${cq_moderation},${post_list},${number_qp},${inline_size},${number_iterations},${server},${client}/" | head -n -1      
     exit 1
 }
 
@@ -48,7 +48,7 @@ client(){
         echo "experiment,measurement,device,protocol,txdepth,rxdepth,cqmoderation,postlist,numberqps,inline,iters,server,client,bytes,iterations,bwpeak,bwavg,msgrate" | tee -a $FILE
     fi
     
-    numactl --cpubind=0 ib_send_bw  -d ${device} -a -n ${number_iterations} -R -F -t ${tx_depth} -Q ${cq_moderation} -q ${number_qp} -l ${post_list} -I ${inline_size} ${server_ip} | grep -v "^ local" | grep -v "^ remote" | tail -n +18 |sed 's/\s\+/,/g' | sed 's/-\+//g' | sed "s/^/${experiment},bw,${device},${protocol},${tx_depth},${rx_depth},${cq_moderation},${post_list},${number_qp},${inline_size},${number_iterations},${server},${client}/" | head -n -1 | tee -a $FILE    
+    numactl --cpubind=0 ./perftest/ib_send_bw  -d ${device} -a -n ${number_iterations} -R -F -t ${tx_depth} -Q ${cq_moderation} -q ${number_qp} -l ${post_list} -I ${inline_size} ${server_ip} | grep -v "^ local" | grep -v "^ remote" | tail -n +18 |sed 's/\s\+/,/g' | sed 's/-\+//g' | sed "s/^/${experiment},bw,${device},${protocol},${tx_depth},${rx_depth},${cq_moderation},${post_list},${number_qp},${inline_size},${number_iterations},${server},${client}/" | head -n -1 | tee -a $FILE    
     exit 1
 }
 
