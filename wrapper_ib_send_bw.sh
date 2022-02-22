@@ -20,7 +20,7 @@ FILE="null" # will be constructed based on experiment name
 
 declare -A PERFTEST_PATH=( ["IB"]="./perftest/" ["EFA"]="/opt/perftest/bin/")
 declare -A ADDITIONAL_FLAGS=( ["IB"]="-R" ["EFA"]="-x 0")
-declare -A LINES=( ["IB"]="+18" ["EFA"]="+20")
+declare -A LINES=( ["IB"]="+18" ["EFA"]="+21")
 
 help(){
     echo "Usage:  TODO " >&2
