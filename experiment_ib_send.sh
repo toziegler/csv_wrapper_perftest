@@ -36,11 +36,11 @@ run_experiment(){
 server(){
     sleep=1
 
-    # # latency 
-    # run_experiment "numactl --cpubind=0 ./perftest/ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F --perform_warm_up -c ${protocol}" $sleep # latency
+    # latency 
+    run_experiment "numactl --cpubind=0 ./perftest/ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F --perform_warm_up -c ${protocol}" $sleep # latency
 
-    # # latency inline
-    # run_experiment "numactl --cpubind=0 ./perftest/ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F --perform_warm_up -c ${protocol}" $sleep # latency
+    # latency inline
+    run_experiment "numactl --cpubind=0 ./perftest/ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F --perform_warm_up -c ${protocol}" $sleep # latency
 
     # sync bw 
     run_experiment "numactl --cpubind=0 ./perftest/ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F -c ${protocol}" $sleep # bw
