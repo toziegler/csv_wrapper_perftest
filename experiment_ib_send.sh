@@ -32,7 +32,7 @@ run_experiment(){
 
 server(){
     sleep=1
-    run_experiment "numactl --cpubind=0 ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F --perform_warm_up -c ${protocol}" $sleep # latency
+    run_experiment "numactl --cpubind=0 ./perftest/ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F --perform_warm_up -c ${protocol}" $sleep # latency
     exit 1
 }
 
