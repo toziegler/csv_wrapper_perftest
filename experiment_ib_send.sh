@@ -12,6 +12,9 @@ NUMBER_ITERATIONS=50000
 TX_DEPTHS=( 1 2 4 8 16 32 64 128 256 512 1024)
 CQ_MODS=( 1 2 4 8 16 32 64 128 256 512 1024)
 
+declare -A PERFTEST_PATH=( ["IB"]="./perftest/" ["EFA"]="/opt/perftest/bin/")
+declare -A ADDITIONAL_FLAGS=( ["IB"]="-R" ["EFA"]="-x 0")
+
 help(){
     echo "Usage:  TODO " >&2
     echo
@@ -37,19 +40,19 @@ server(){
     sleep=1
 
     # latency 
-    run_experiment "numactl --cpubind=0 ./perftest/ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F --perform_warm_up -c ${protocol}" $sleep # latency
+    run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F --perform_warm_up -c ${protocol}" $sleep # latency
 
     # latency inline
-    run_experiment "numactl --cpubind=0 ./perftest/ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F --perform_warm_up -c ${protocol}" $sleep # latency
+    run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F --perform_warm_up -c ${protocol}" $sleep # latency
 
     # sync bw 
-    run_experiment "numactl --cpubind=0 ./perftest/ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F -c ${protocol}" $sleep # bw
+    run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw
 
     # increase the number of outstanding I/Os
     for i in "${TX_DEPTHS[@]}"
     do
 	    echo "tx depth $i"
-        run_experiment "numactl --cpubind=0 ./perftest/ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F -c ${protocol}" $sleep # bw
+        run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw
     done
     
     # decrease the number of completion events take maximum number of tx completions
@@ -57,7 +60,7 @@ server(){
     for i in "${CQ_MODS[@]}"
     do
 	    echo "cq mod $i"
-        run_experiment "numactl --cpubind=0 ./perftest/ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F -c ${protocol}" $sleep # bw
+        run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw
     done
     
     
