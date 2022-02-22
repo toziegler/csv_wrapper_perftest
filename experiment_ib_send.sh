@@ -6,14 +6,17 @@ server_ip=null
 fabric="null"
 protocol="null"
 
-NUMBER_RUNS=3
-NUMBER_ITERATIONS=50000
+# NUMBER_RUNS=3
+NUMBER_RUNS=1
+# NUMBER_ITERATIONS=50000
+NUMBER_ITERATIONS=10000
 
 TX_DEPTHS=( 1 2 4 8 16 32 64 128 256 512 1024)
 CQ_MODS=( 1 2 4 8 16 32 64 128 256 512 1024)
 
 declare -A PERFTEST_PATH=( ["IB"]="./perftest/" ["EFA"]="/opt/perftest/bin/")
 declare -A ADDITIONAL_FLAGS=( ["IB"]="-R" ["EFA"]="-x 0")
+declare -A INLINE_SIZE=( ["IB"]="220" ["EFA"]="32")
 
 help(){
     echo "Usage:  TODO " >&2
@@ -76,7 +79,7 @@ client(){
     run_experiment "bash wrapper_ib_send_lat.sh -e latency -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric}" $sleep
 
     # latency inline
-    run_experiment "bash wrapper_ib_send_lat.sh -e latency_inline -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -i 220" $sleep
+    run_experiment "bash wrapper_ib_send_lat.sh -e latency_inline -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -i ${INLINE_SIZE[${fabric}]}" $sleep
 
     # bw 1 1
     run_experiment "bash wrapper_ib_send_bw.sh -e bw_sync -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 1 -m 1 -l 1 -q 1" $sleep
