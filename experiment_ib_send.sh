@@ -53,7 +53,14 @@ server(){
     done
     
     # decrease the number of completion events take maximum number of tx completions
-
+    # cq moderation
+    for i in "${CQ_MODS[@]}"
+    do
+	    echo "cq mod $i"
+        run_experiment "numactl --cpubind=0 ./perftest/ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} -R -F -c ${protocol}" $sleep # bw
+    done
+    
+    
     # run experiment with multiple queues 
     
     exit 1
@@ -62,24 +69,33 @@ server(){
 client(){
     sleep=3 # ensures that server starts before client
 
-    # # latency 
-    # run_experiment "bash wrapper_ib_send_lat.sh -e latency -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric}" $sleep
+    # latency 
+    run_experiment "bash wrapper_ib_send_lat.sh -e latency -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric}" $sleep
 
-    # # latency inline
-    # run_experiment "bash wrapper_ib_send_lat.sh -e latency_inline -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -i 220" $sleep
+    # latency inline
+    run_experiment "bash wrapper_ib_send_lat.sh -e latency_inline -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -i 220" $sleep
 
     # bw 1 1
-    run_experiment "bash wrapper_ib_send_bw.sh -e bw_sync -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 1 - m 1 -l 1 -q 1" $sleep
+    run_experiment "bash wrapper_ib_send_bw.sh -e bw_sync -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 1 -m 1 -l 1 -q 1" $sleep
 
     # tx depth
     for i in "${TX_DEPTHS[@]}"
     do
 	    echo "tx depth $i"
-        run_experiment "bash wrapper_ib_send_bw.sh -e bw_sync -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t ${i} - m 1 -l 1 -q 1" $sleep
+        run_experiment "bash wrapper_ib_send_bw.sh -e bw_tx_depth -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t ${i} -m 1 -l 1 -q 1" $sleep
     done
+
     # cq moderation
-    # multiple queues 
-    exit 1
+    for i in "${CQ_MODS[@]}"
+    do
+	    echo "cq mod $i"
+        run_experiment "bash wrapper_ib_send_bw.sh -e bw_cq_mod -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 1024 -m ${i} -l 1 -q 1" $sleep
+    done
+    
+    # multiple queues
+    # standard configuration or best performing
+    
+    
 }
 
 main(){
