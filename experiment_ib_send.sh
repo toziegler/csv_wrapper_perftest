@@ -81,6 +81,19 @@ server(){
     do
         run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n 64000 ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw  
     done
+
+    # same with inline enabled 
+    # multiple queues
+    for i in "${NUMBER_QS[@]}"
+    do
+        run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol} -q ${i}" $sleep # bw  
+    done
+   
+    # post list 
+    for i in "${POST_LIST[@]}"
+    do
+        run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n 64000 ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw  
+    done
     
     
     exit 1
