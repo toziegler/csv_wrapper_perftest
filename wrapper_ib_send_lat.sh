@@ -33,7 +33,7 @@ server(){
     #     echo "experiment,measurement,device,protocol,txdepth,rxdepth,cqmoderation,postlist,numberqps,inline,iters,server,client,bytes,iterations,bwpeak,bwavg,msgrate" | tee -a bw_benchmark.csv
     # fi
 
-    # numactl --cpubind=0 ./perftest/ib_send_bw  -d ${device} -a -n ${number_iterations} -R -F -r ${rx_depth} -Q ${cq_moderation} -q ${number_qp} -l ${post_list} -I ${inline_size} | grep -v "^ local" | grep -v "^ remote" | tail -n +20 |sed 's/\s\+/,/g' | sed 's/-\+//g' | sed "s/^/${experiment},bw,${device},${protocol},${tx_depth},${rx_depth},${cq_moderation},${post_list},${number_qp},${inline_size},${number_iterations},${server},${client}/" | head -n -1      
+    # numactl --membind=0 taskset -c 0 ./perftest/ib_send_bw  -d ${device} -a -n ${number_iterations} -R -F -r ${rx_depth} -Q ${cq_moderation} -q ${number_qp} -l ${post_list} -I ${inline_size} | grep -v "^ local" | grep -v "^ remote" | tail -n +20 |sed 's/\s\+/,/g' | sed 's/-\+//g' | sed "s/^/${experiment},bw,${device},${protocol},${tx_depth},${rx_depth},${cq_moderation},${post_list},${number_qp},${inline_size},${number_iterations},${server},${client}/" | head -n -1      
     exit 1
 }
 
@@ -46,9 +46,9 @@ client(){
         echo "experiment,measurement,device,protocol,inline,iters,server,client,bytes,iterations,min,max,typical,avg,stddev,99percentile,999percentile" | tee -a $FILE
     fi
 
-    echo "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_lat  -d ${device} -a -n ${number_iterations} ${ADDITIONAL_FLAGS[${fabric}]} -F -I ${inline_size} -c ${protocol} ${server_ip} --perform_warm_up"
+    echo "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_lat  -d ${device} -a -n ${number_iterations} ${ADDITIONAL_FLAGS[${fabric}]} -F -I ${inline_size} -c ${protocol} ${server_ip} --perform_warm_up"
     
-    numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_lat  -d ${device} -a -n ${number_iterations} ${ADDITIONAL_FLAGS[${fabric}]} -F -I ${inline_size} -c ${protocol} ${server_ip} --perform_warm_up | grep -v "^ local" | grep -v "^ remote" | tail -n ${LINES[${fabric}]} |sed 's/\s\+/,/g' | sed 's/-\+//g' | sed "s/^/${experiment},lat,${device},${protocol},${inline_size},${number_iterations},${server},${client}/" | head -n -1 | sed 's/\(.*\),/\1 /' | tee -a $FILE # last set removes additional commata
+    numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_lat  -d ${device} -a -n ${number_iterations} ${ADDITIONAL_FLAGS[${fabric}]} -F -I ${inline_size} -c ${protocol} ${server_ip} --perform_warm_up | grep -v "^ local" | grep -v "^ remote" | tail -n ${LINES[${fabric}]} |sed 's/\s\+/,/g' | sed 's/-\+//g' | sed "s/^/${experiment},lat,${device},${protocol},${inline_size},${number_iterations},${server},${client}/" | head -n -1 | sed 's/\(.*\),/\1 /' | tee -a $FILE # last set removes additional commata
     exit 1
 }
 

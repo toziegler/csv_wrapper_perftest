@@ -43,13 +43,13 @@ server(){
     sleep=0
 
     # latency 
-    run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F --perform_warm_up -c ${protocol}" $sleep # latency
+    run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F --perform_warm_up -c ${protocol}" $sleep # latency
 
     # latency inline
-    run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F --perform_warm_up -c ${protocol}" $sleep # latency
+    run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F --perform_warm_up -c ${protocol}" $sleep # latency
 
     # sync bw 
-    run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw
+    run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw
 
    
     # Grid search
@@ -60,33 +60,33 @@ server(){
             if (( ${i} < ${j} )); then
                 continue
             fi
-            run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw  
+            run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw  
         done
     done
     
     # multiple queues
     for i in "${NUMBER_QS[@]}"
     do
-        run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol} -q ${i}" $sleep # bw  
+        run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol} -q ${i}" $sleep # bw  
     done
    
     # post list 
     for i in "${POST_LIST[@]}"
     do
-        run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n 64000 ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw  
+        run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n 64000 ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw  
     done
 
     # same with inline enabled 
     # multiple queues
     for i in "${NUMBER_QS[@]}"
     do
-        run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol} -q ${i}" $sleep # bw  
+        run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol} -q ${i}" $sleep # bw  
     done
    
     # post list 
     for i in "${POST_LIST[@]}"
     do
-        run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n 64000 ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw  
+        run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n 64000 ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw  
     done
     
     
