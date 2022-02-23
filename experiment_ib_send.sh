@@ -44,32 +44,28 @@ run_experiment(){
 server(){
     sleep=1
 
-    # # latency 
-    # run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F --perform_warm_up -c ${protocol}" $sleep # latency
+    # latency 
+    run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F --perform_warm_up -c ${protocol}" $sleep # latency
 
-    # # latency inline
-    # run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F --perform_warm_up -c ${protocol}" $sleep # latency
+    # latency inline
+    run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F --perform_warm_up -c ${protocol}" $sleep # latency
 
-    # # sync bw 
-    # run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw
+    # sync bw 
+    run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw
 
    
-    # # Grid search
-    # for i in "${TX_DEPTHS[@]}"
-    # do
-    #     for j in "${CQ_MODS[@]}"
-    #     do
-    #         if (( ${i} < ${j} )); then
-    #             continue
-    #         fi
-    #         run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw  
-    #     done
-    # done
+    # Grid search
+    for i in "${TX_DEPTHS[@]}"
+    do
+        for j in "${CQ_MODS[@]}"
+        do
+            if (( ${i} < ${j} )); then
+                continue
+            fi
+            run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw  
+        done
+    done
     
-    # run experiment with multiple queues
-
-    
-    #tx depth 2048 cq 512 
     # multiple queues
     for i in "${NUMBER_QS[@]}"
     do
@@ -102,29 +98,28 @@ server(){
 client(){
     sleep=3 # ensures that server starts before client
 
-    # # latency 
-    # run_experiment "bash wrapper_ib_send_lat.sh -e latency -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric}" $sleep
+    # latency 
+    run_experiment "bash wrapper_ib_send_lat.sh -e latency -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric}" $sleep
 
-    # # latency inline
-    # run_experiment "bash wrapper_ib_send_lat.sh -e latency_inline -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -i ${INLINE_SIZE[${fabric}]}" $sleep
+    # latency inline
+    run_experiment "bash wrapper_ib_send_lat.sh -e latency_inline -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -i ${INLINE_SIZE[${fabric}]}" $sleep
 
-    # # bw 1 1
-    # run_experiment "bash wrapper_ib_send_bw.sh -e bw_sync -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 1 -m 1 -l 1 -q 1" $sleep
+    # bw 1 1
+    run_experiment "bash wrapper_ib_send_bw.sh -e bw_sync -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 1 -m 1 -l 1 -q 1" $sleep
 
-    # #Grid Search
-    # for i in "${TX_DEPTHS[@]}"
-    # do
-    #     for j in "${CQ_MODS[@]}"
-    #     do
-    #         if (( ${i} < ${j} )); then
-    #             continue
-    #         fi
-	#     echo "tx depth $i"
-    #     run_experiment "bash wrapper_ib_send_bw.sh -e bw_tx_cq_grid -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t ${i} -m ${j} -l 1 -q 1" $sleep
-    #     done
-    # done
-
-    #tx depth 2048 cq 512 
+    #Grid Search
+    for i in "${TX_DEPTHS[@]}"
+    do
+        for j in "${CQ_MODS[@]}"
+        do
+            if (( ${i} < ${j} )); then
+                continue
+            fi
+	    echo "tx depth $i"
+        run_experiment "bash wrapper_ib_send_bw.sh -e bw_tx_cq_grid -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t ${i} -m ${j} -l 1 -q 1" $sleep
+        done
+    done
+    
     # multiple queues
     for i in "${NUMBER_QS[@]}"
     do
