@@ -19,7 +19,6 @@ df_efa$fabric = "EFA"
 df = rbind(df_efa,df_ib)
 
 df_bw_sync = sqldf("SELECT * FROM df WHERE experiment like '%bw_sync%'")
-
 ggplot(df_bw_sync,aes(x=bytes, y=bwavg, color=fabric)) +
     ## geom_point(aes(shape=factor(q)),size=4) +
     geom_point(size=4) +
@@ -39,12 +38,14 @@ ggplot(df_bw_sync,aes(x=bytes, y=bwavg, color=fabric)) +
 
 df_bw_tx_depth = sqldf("SELECT * FROM df WHERE experiment like '%bw_tx_cq_grid%'")
 
-ggplot(df_bw_tx_depth,aes(x=cqmoderation, y=bwavg, color=fabric)) +
+
+# number of batches 
+ggplot(sqldf("SELECT * FROM df_bw_tx_depth WHERE cqmoderation=1"),aes(x=txdepth, y=bwavg, color=fabric)) +
     ## geom_point(aes(shape=factor(q)),size=4) +
     geom_point(size=4) +
     geom_line(size=2, alpha=0.8) +
     theme_bw() +
-    facet_grid( txdepth ~ bytes) +
+    facet_grid( . ~ bytes) +
     scale_colour_manual(values = wes_palette("Darjeeling1")) +
     scale_x_continuous(trans="log2") +
     expand_limits(y=0) +
@@ -56,19 +57,18 @@ ggplot(df_bw_tx_depth,aes(x=cqmoderation, y=bwavg, color=fabric)) +
           legend.margin=margin(0,1,0,0),
           legend.box.margin=margin(-8,-10,-10,-10))
 
-
-
-ggplot(df_bw_tx_depth,aes(x=txdepth, y=bwavg, color=factor(cqmoderation))) +
+# number of batches 
+ggplot(sqldf("SELECT * FROM df_bw_tx_depth WHERE cqmoderation=1"),aes(x=txdepth, y=msgrate, color=fabric)) +
     ## geom_point(aes(shape=factor(q)),size=4) +
     geom_point(size=4) +
     geom_line(size=2, alpha=0.8) +
     theme_bw() +
-    facet_grid( fabric ~ bytes) +
-    ## scale_colour_manual(values = wes_palette("Darjeeling1")) +
+    facet_grid( . ~ bytes) +
+    scale_colour_manual(values = wes_palette("Darjeeling1")) +
     scale_x_continuous(trans="log2") +
     expand_limits(y=0) +
     xlab("tx depth") +
-    ylab("bandwidth [MB/s]") +
+    ylab("msgrate [M]") +
     theme(legend.position="top",
           legend.title=element_blank(),
           text=element_text(size=18),
@@ -76,14 +76,34 @@ ggplot(df_bw_tx_depth,aes(x=txdepth, y=bwavg, color=factor(cqmoderation))) +
           legend.box.margin=margin(-8,-10,-10,-10))
 
 
-df_bw_cq_mod = sqldf("SELECT * FROM df WHERE experiment like '%bw_cq_mod%'")
 
-ggplot(df_bw_cq_mod,aes(x=cqmoderation, y=bwavg, color=fabric)) +
+
+# cq moderation msg rate 
+ggplot(df_bw_tx_depth,aes(x=cqmoderation, y=msgrate, color=fabric)) +
     ## geom_point(aes(shape=factor(q)),size=4) +
     geom_point(size=4) +
     geom_line(size=2, alpha=0.8) +
     theme_bw() +
-    facet_grid(.~ bytes) +
+    facet_grid( txdepth ~ bytes) +
+    scale_colour_manual(values = wes_palette("Darjeeling1")) +
+    scale_x_continuous(trans="log2") +
+    expand_limits(y=0) +
+    xlab("cq moderation") +
+    ylab("msgrate [M]") +
+    theme(legend.position="top",
+          legend.title=element_blank(),
+          text=element_text(size=18),
+          legend.margin=margin(0,1,0,0),
+          legend.box.margin=margin(-8,-10,-10,-10))
+
+
+# cq moderation bw
+ggplot(df_bw_tx_depth,aes(x=cqmoderation, y=bwavg, color=fabric)) +
+    ## geom_point(aes(shape=factor(q)),size=4) +
+    geom_point(size=4) +
+    geom_line(size=2, alpha=0.8) +
+    theme_bw() +
+    facet_grid( txdepth ~ bytes) +
     scale_colour_manual(values = wes_palette("Darjeeling1")) +
     scale_x_continuous(trans="log2") +
     expand_limits(y=0) +
@@ -96,5 +116,59 @@ ggplot(df_bw_cq_mod,aes(x=cqmoderation, y=bwavg, color=fabric)) +
           legend.box.margin=margin(-8,-10,-10,-10))
 
 
+df_qps = sqldf("SELECT * FROM df where experiment like '%bw_qps%'")
+ggplot(df_qps,aes(x=numberqps, y=bwavg, color=interaction(fabric,experiment))) +
+    ## geom_point(aes(shape=factor(q)),size=4) +
+    geom_point(size=4) +
+    geom_line(size=2, alpha=0.8) +
+    theme_bw() +
+    facet_grid(. ~ bytes) +
+    scale_colour_manual(values = wes_palette("Darjeeling1")) +
+    scale_x_continuous(trans="log2") +
+    expand_limits(y=0) +
+    xlab("cq moderation") +
+    ylab("bandwidth [MB/s]") +
+    theme(legend.position="top",
+          legend.title=element_blank(),
+          text=element_text(size=18),
+          legend.margin=margin(0,1,0,0),
+          legend.box.margin=margin(-8,-10,-10,-10))
 
 
+df_qps = sqldf("SELECT * FROM df where experiment like '%bw_qps%'")
+ggplot(df_qps,aes(x=numberqps, y=msgrate, color=interaction(fabric,experiment))) +
+    ## geom_point(aes(shape=factor(q)),size=4) +
+    geom_point(size=4) +
+    geom_line(size=2, alpha=0.8) +
+    theme_bw() +
+    facet_grid(. ~ bytes) +
+    scale_colour_manual(values = wes_palette("Darjeeling1")) +
+    scale_x_continuous(trans="log2") +
+    expand_limits(y=0) +
+    xlab("number qps") +
+    ylab("msgrate [M]") +
+    theme(legend.position="top",
+          legend.title=element_blank(),
+          text=element_text(size=18),
+          legend.margin=margin(0,1,0,0),
+          legend.box.margin=margin(-8,-10,-10,-10))
+
+
+
+df_qps = sqldf("SELECT * FROM df where experiment like '%bw_post_list%'")
+ggplot(df_qps,aes(x=postlist, y=msgrate, color=interaction(fabric,experiment))) +
+    ## geom_point(aes(shape=factor(q)),size=4) +
+    geom_point(size=4) +
+    geom_line(size=2, alpha=0.8) +
+    theme_bw() +
+    facet_grid(. ~ bytes) +
+    scale_colour_manual(values = wes_palette("Darjeeling1")) +
+    scale_x_continuous(trans="log2") +
+    expand_limits(y=0) +
+    xlab("post list length") +
+    ylab("msgrate [M]") +
+    theme(legend.position="top",
+          legend.title=element_blank(),
+          text=element_text(size=18),
+          legend.margin=margin(0,1,0,0),
+          legend.box.margin=margin(-8,-10,-10,-10))
