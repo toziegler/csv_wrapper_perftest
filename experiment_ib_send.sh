@@ -123,6 +123,19 @@ client(){
     do
         run_experiment "bash wrapper_ib_send_bw.sh -e bw_post_list -d ${device} -p ${protocol} -c -a ${server_ip} -n 64000 -f ${fabric} -t 128 -m 4 -l ${i} -q 1" $sleep
     done
+
+    # same with inline
+
+    for i in "${NUMBER_QS[@]}"
+    do
+        run_experiment "bash wrapper_ib_send_bw.sh -e bw_qps_inline -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 128 -m 100 -l 1 -q ${i} -i ${INLINE_SIZE[${fabric}]}" $sleep
+    done
+    
+    # post list
+    for i in "${POST_LIST[@]}"
+    do
+        run_experiment "bash wrapper_ib_send_bw.sh -e bw_post_list_inline -d ${device} -p ${protocol} -c -a ${server_ip} -n 64000 -f ${fabric} -t 128 -m 4 -l ${i} -q 1 -i ${INLINE_SIZE[${fabric}]}" $sleep
+    done
     
 }
 
