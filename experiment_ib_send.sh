@@ -42,7 +42,7 @@ run_experiment(){
 }
 
 server(){
-    sleep=1
+    sleep=0
 
     # latency 
     run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F --perform_warm_up -c ${protocol}" $sleep # latency
@@ -96,7 +96,7 @@ server(){
 }
 
 client(){
-    sleep=3 # ensures that server starts before client
+    sleep=2 # ensures that server starts before client
 
     # latency 
     run_experiment "bash wrapper_ib_send_lat.sh -e latency -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric}" $sleep
