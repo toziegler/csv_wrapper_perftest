@@ -37,13 +37,14 @@ ggplot(df_bw_sync,aes(x=bytes, y=bwavg, color=fabric)) +
           legend.box.margin=margin(-8,-10,-10,-10))
 
 
-df_bw_tx_depth = sqldf("SELECT * FROM df WHERE experiment like '%bw_tx_depth%'")
-ggplot(df_bw_tx_depth,aes(x=txdepth, y=bwavg, color=fabric)) +
+df_bw_tx_depth = sqldf("SELECT * FROM df WHERE experiment like '%bw_tx_cq_grid%'")
+
+ggplot(df_bw_tx_depth,aes(x=cqmoderation, y=bwavg, color=fabric)) +
     ## geom_point(aes(shape=factor(q)),size=4) +
     geom_point(size=4) +
     geom_line(size=2, alpha=0.8) +
     theme_bw() +
-    facet_grid(.~ bytes) +
+    facet_grid( txdepth ~ bytes) +
     scale_colour_manual(values = wes_palette("Darjeeling1")) +
     scale_x_continuous(trans="log2") +
     expand_limits(y=0) +
@@ -55,6 +56,24 @@ ggplot(df_bw_tx_depth,aes(x=txdepth, y=bwavg, color=fabric)) +
           legend.margin=margin(0,1,0,0),
           legend.box.margin=margin(-8,-10,-10,-10))
 
+
+
+ggplot(df_bw_tx_depth,aes(x=txdepth, y=bwavg, color=factor(cqmoderation))) +
+    ## geom_point(aes(shape=factor(q)),size=4) +
+    geom_point(size=4) +
+    geom_line(size=2, alpha=0.8) +
+    theme_bw() +
+    facet_grid( fabric ~ bytes) +
+    ## scale_colour_manual(values = wes_palette("Darjeeling1")) +
+    scale_x_continuous(trans="log2") +
+    expand_limits(y=0) +
+    xlab("tx depth") +
+    ylab("bandwidth [MB/s]") +
+    theme(legend.position="top",
+          legend.title=element_blank(),
+          text=element_text(size=18),
+          legend.margin=margin(0,1,0,0),
+          legend.box.margin=margin(-8,-10,-10,-10))
 
 
 df_bw_cq_mod = sqldf("SELECT * FROM df WHERE experiment like '%bw_cq_mod%'")
