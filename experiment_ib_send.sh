@@ -73,7 +73,7 @@ server(){
     do
         for j in "${CQ_MODS[@]}"
         do
-            if [[ ${i} < ${j} ]];then
+            if (( ${i} < ${j} )); then
                 continue
             fi
             run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw  
@@ -131,7 +131,7 @@ client(){
     do
         for j in "${CQ_MODS[@]}"
         do
-            if [[ ${i} < ${j} ]];then
+            if (( ${i} < ${j} )); then
                 continue
             fi
 	    echo "tx depth $i"
