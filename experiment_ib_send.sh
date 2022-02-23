@@ -8,11 +8,13 @@ protocol="null"
 
 # NUMBER_RUNS=3
 NUMBER_RUNS=1
-# NUMBER_ITERATIONS=50000
-NUMBER_ITERATIONS=10000
+NUMBER_ITERATIONS=50000
+# NUMBER_ITERATIONS=10000
 
-TX_DEPTHS=( 1 2 4 8 16 32 64 128 256 512 1024)
+TX_DEPTHS=( 1 2 4 8 16 32 64 128 256 512 1024 2048 4096 8192 16384)
 CQ_MODS=( 1 2 4 8 16 32 64 128 256 512 1024)
+# NUMBER_QS=( 1 2 4 8)
+# POST_LIST=( 1 2 4 8)
 
 declare -A PERFTEST_PATH=( ["IB"]="./perftest/" ["EFA"]="/opt/perftest/bin/")
 declare -A ADDITIONAL_FLAGS=( ["IB"]="-R" ["EFA"]="-x 0")
@@ -51,21 +53,29 @@ server(){
     # sync bw 
     run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw
 
-    # increase the number of outstanding I/Os
+    # # increase the number of outstanding I/Os
+    # for i in "${TX_DEPTHS[@]}"
+    # do
+	#     echo "tx depth $i"
+    #     run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw
+    # done
+    
+    # # decrease the number of completion events take maximum number of tx completions
+    # # cq moderation
+    # for i in "${CQ_MODS[@]}"
+    # do
+	#     echo "cq mod $i"
+    #     run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw
+    # done
+
+    # Grid search
     for i in "${TX_DEPTHS[@]}"
     do
-	    echo "tx depth $i"
-        run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw
+        for j in "${CQ_MODS[@]}"
+        do
+            run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw  
+        done
     done
-    
-    # decrease the number of completion events take maximum number of tx completions
-    # cq moderation
-    for i in "${CQ_MODS[@]}"
-    do
-	    echo "cq mod $i"
-        run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw
-    done
-    
     
     # run experiment with multiple queues 
     
@@ -84,21 +94,32 @@ client(){
     # bw 1 1
     run_experiment "bash wrapper_ib_send_bw.sh -e bw_sync -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 1 -m 1 -l 1 -q 1" $sleep
 
-    # tx depth
+    # # tx depth
+    # for i in "${TX_DEPTHS[@]}"
+    # do
+	#     echo "tx depth $i"
+    #     run_experiment "bash wrapper_ib_send_bw.sh -e bw_tx_depth -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t ${i} -m 1 -l 1 -q 1" $sleep
+    # done
+
+    # # cq moderation
+    # for i in "${CQ_MODS[@]}"
+    # do
+	#     echo "cq mod $i"
+    #     run_experiment "bash wrapper_ib_send_bw.sh -e bw_cq_mod -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 1024 -m ${i} -l 1 -q 1" $sleep
+    # done
+
+    #Grid Search
     for i in "${TX_DEPTHS[@]}"
     do
+        for j in "${CQ_MODS[@]}"
+        do
 	    echo "tx depth $i"
-        run_experiment "bash wrapper_ib_send_bw.sh -e bw_tx_depth -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t ${i} -m 1 -l 1 -q 1" $sleep
+        run_experiment "bash wrapper_ib_send_bw.sh -e bw_tx_cq_grid -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t ${i} -m ${j} -l 1 -q 1" $sleep
+        done
     done
 
-    # cq moderation
-    for i in "${CQ_MODS[@]}"
-    do
-	    echo "cq mod $i"
-        run_experiment "bash wrapper_ib_send_bw.sh -e bw_cq_mod -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 1024 -m ${i} -l 1 -q 1" $sleep
-    done
-    
     # multiple queues
+
     # standard configuration or best performing
     
     

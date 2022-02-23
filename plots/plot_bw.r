@@ -9,12 +9,18 @@ library(readr)
 library(dplyr)
 options(scipen=999)
 
-df = read.csv("../csv/IB_bw_benchmark.csv", header=TRUE, sep=",", row.names=NULL)
+df_ib = read.csv("../csv/IB_bw_benchmark.csv", header=TRUE, sep=",", row.names=NULL)
+df_ib$fabric = "IB"
 
+df_efa = read.csv("../csv/EFA_bw_benchmark.csv", header=TRUE, sep=",", row.names=NULL)
+df_efa$fabric = "EFA"
 
+#combine them into df
+df = rbind(df_efa,df_ib)
 
 df_bw_sync = sqldf("SELECT * FROM df WHERE experiment like '%bw_sync%'")
-ggplot(df_bw_sync,aes(x=bytes, y=bwavg, color=experiment)) +
+
+ggplot(df_bw_sync,aes(x=bytes, y=bwavg, color=fabric)) +
     ## geom_point(aes(shape=factor(q)),size=4) +
     geom_point(size=4) +
     geom_line(size=2, alpha=0.8) +
@@ -32,7 +38,7 @@ ggplot(df_bw_sync,aes(x=bytes, y=bwavg, color=experiment)) +
 
 
 df_bw_tx_depth = sqldf("SELECT * FROM df WHERE experiment like '%bw_tx_depth%'")
-ggplot(df_bw_tx_depth,aes(x=txdepth, y=bwavg, color=experiment)) +
+ggplot(df_bw_tx_depth,aes(x=txdepth, y=bwavg, color=fabric)) +
     ## geom_point(aes(shape=factor(q)),size=4) +
     geom_point(size=4) +
     geom_line(size=2, alpha=0.8) +
@@ -51,12 +57,9 @@ ggplot(df_bw_tx_depth,aes(x=txdepth, y=bwavg, color=experiment)) +
 
 
 
-
-
-
 df_bw_cq_mod = sqldf("SELECT * FROM df WHERE experiment like '%bw_cq_mod%'")
 
-ggplot(df_bw_cq_mod,aes(x=cqmoderation, y=bwavg, color=experiment)) +
+ggplot(df_bw_cq_mod,aes(x=cqmoderation, y=bwavg, color=fabric)) +
     ## geom_point(aes(shape=factor(q)),size=4) +
     geom_point(size=4) +
     geom_line(size=2, alpha=0.8) +
