@@ -48,7 +48,7 @@ client(){
 
     echo "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_lat  -d ${device} -a -n ${number_iterations} ${ADDITIONAL_FLAGS[${fabric}]} -F -I ${inline_size} -c ${protocol} ${server_ip} --perform_warm_up"
     
-    numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_lat  -d ${device} -a -n ${number_iterations} ${ADDITIONAL_FLAGS[${fabric}]} -F -I ${inline_size} -c ${protocol} ${server_ip} --perform_warm_up | grep -v "^ local" | grep -v "^ remote" | tail -n ${LINES[${fabric}]} |sed 's/\s\+/,/g' | sed 's/-\+//g' | sed "s/^/${experiment},lat,${device},${protocol},${inline_size},${number_iterations},${server},${client}/" | head -n -1 | tee -a $FILE
+    numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_lat  -d ${device} -a -n ${number_iterations} ${ADDITIONAL_FLAGS[${fabric}]} -F -I ${inline_size} -c ${protocol} ${server_ip} --perform_warm_up | grep -v "^ local" | grep -v "^ remote" | tail -n ${LINES[${fabric}]} |sed 's/\s\+/,/g' | sed 's/-\+//g' | sed "s/^/${experiment},lat,${device},${protocol},${inline_size},${number_iterations},${server},${client}/" | head -n -1 | sed 's/\(.*\),/\1 /' | tee -a $FILE # last set removes additional commata
     exit 1
 }
 
