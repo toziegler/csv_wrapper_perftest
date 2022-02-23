@@ -13,8 +13,8 @@ NUMBER_ITERATIONS=50000
 
 TX_DEPTHS=( 1 2 4 8 16 32 64 128 256 512 1024 2048 4096 8192 12288)
 CQ_MODS=( 1 2 4 8 16 32 64 128 256 512 1024)
-# NUMBER_QS=( 1 2 4 8)
-# POST_LIST=( 1 2 4 8)
+NUMBER_QS=( 1 2 4 8)
+POST_LIST=( 1 2 4 8)
 
 declare -A PERFTEST_PATH=( ["IB"]="./perftest/" ["EFA"]="/opt/perftest/bin/")
 declare -A ADDITIONAL_FLAGS=( ["IB"]="-R" ["EFA"]="-x 0")
@@ -73,11 +73,29 @@ server(){
     do
         for j in "${CQ_MODS[@]}"
         do
+            if [[ ${i} < ${j} ]];then
+                continue
+            fi
             run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw  
         done
     done
     
-    # run experiment with multiple queues 
+    # run experiment with multiple queues
+
+    
+    #tx depth 2048 cq 512 
+    # multiple queues
+    for i in "${NUMBER_QS[@]}"
+    do
+        run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw  
+    done
+    
+    # post list 
+    for i in "${POST_LIST[@]}"
+    do
+        run_experiment "numactl --cpubind=0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw  
+    done
+    
     
     exit 1
 }
@@ -113,15 +131,26 @@ client(){
     do
         for j in "${CQ_MODS[@]}"
         do
+            if [[ ${i} < ${j} ]];then
+                continue
+            fi
 	    echo "tx depth $i"
         run_experiment "bash wrapper_ib_send_bw.sh -e bw_tx_cq_grid -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t ${i} -m ${j} -l 1 -q 1" $sleep
         done
     done
 
+    #tx depth 2048 cq 512 
     # multiple queues
-
-    # standard configuration or best performing
+    for i in "${NUMBER_QS[@]}"
+    do
+        run_experiment "bash wrapper_ib_send_bw.sh -e bw_qps -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 2048 -m 512 -l 1 -q ${i}" $sleep
+    done
     
+    # post list 
+    for i in "${POST_LIST[@]}"
+    do
+        run_experiment "bash wrapper_ib_send_bw.sh -e bw_post_list -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 2048 -m 512 -l ${i} -q 1" $sleep
+    done
     
 }
 
