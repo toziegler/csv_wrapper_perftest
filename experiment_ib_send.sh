@@ -95,8 +95,8 @@ server(){
     do
 	    echo "tx depth $i"
         run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS}  ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw  
-        done
     done
+
     
     
     exit 1
@@ -157,8 +157,8 @@ client(){
     do
 	    echo "tx depth $i"
         run_experiment "bash wrapper_ib_send_bw.sh -e bw_tx_depth_inline -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t ${i} -m 1 -l 1 -q 1 -i ${INLINE_SIZE[${fabric}]}" $sleep
-        done
     done
+
     
 }
 
