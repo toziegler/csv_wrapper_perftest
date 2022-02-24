@@ -215,3 +215,32 @@ ggplot(df_post,aes(x=postlist, y=msgrate, color=interaction(fabric,experiment)))
           legend.box.margin=margin(-8,-10,-10,-10))
 
 kable(df_post, "latex", booktabs = TRUE)
+
+
+
+                                        # number of batches
+df_in = sqldf("SELECT * FROM df WHERE experiment like '%%bw_tx_depth_inline' and bytes <=8192")
+
+df_no_in = sqldf("SELECT * FROM df_bw_tx_depth WHERE cqmoderation=1 and bytes <=8192")
+
+
+df_in =rbind(df_in, df_no_in)
+               
+p_msgr = ggplot(df_in,aes(x=txdepth, y=msgrate, color=interaction(fabric,experiment))) +
+    ## geom_point(aes(shape=factor(q)),size=4) +
+    geom_point(size=4) +
+    geom_line(size=2, alpha=0.8) +
+    theme_bw() +
+    facet_grid( . ~ bytes) +
+    scale_colour_manual(values = theme) +
+    scale_x_continuous(trans="log2") +
+    expand_limits(y=0) +
+    xlab("tx depth") +
+    ylab("msgrate [M]") +
+    theme(legend.position="top",
+          legend.title=element_blank(),
+          text=element_text(size=18),
+          legend.margin=margin(0,1,0,0),
+          legend.box.margin=margin(-8,-10,-10,-10))
+
+p_msgr
