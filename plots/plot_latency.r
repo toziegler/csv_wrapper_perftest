@@ -9,6 +9,7 @@ library(readr)
 library(dplyr)
 options(scipen=999)
 
+theme =c("#00A08A", "#F98400", "#5BBCD6")
 
 df_srd_ud = read.csv("../csv/EFA_lat_UD_SRD_benchmark.csv", header=TRUE, sep=",", row.names=NULL)
 
@@ -18,7 +19,7 @@ ggplot(df_srd_ud,aes(x=bytes, y=avg, color=protocol)) +
     geom_point(size=4) +
     geom_line(size=2, alpha=0.8) +
     theme_bw() +
-    scale_colour_manual(values = wes_palette("Darjeeling1")) +
+    scale_colour_manual(values = theme) +
     expand_limits(y=0) +
     scale_x_continuous(labels = scales::label_bytes(), trans="log2") +
     xlab("message size") +
@@ -53,7 +54,7 @@ ggplot(sqldf("SELECT * from df where experiment not like '%inline%' AND bytes >=
     geom_point(size=4) +
     geom_line(size=2, alpha=0.8) +
     theme_bw() +
-    scale_colour_manual(values = wes_palette("Darjeeling1")) +
+    scale_colour_manual(values = theme) +
     expand_limits(y=0) +
     scale_x_continuous(labels = scales::label_bytes(), trans="log2") +
     xlab("message size [KB]") +
@@ -71,7 +72,7 @@ ggplot(sqldf("SELECT * from df where experiment not like '%inline%' AND bytes >=
     geom_point(size=4) +
     geom_line(size=2, alpha=0.8) +
     theme_bw() +
-    scale_colour_manual(values = wes_palette("Darjeeling1")) +
+    scale_colour_manual(values = theme) +
     expand_limits(y=0) +
     scale_x_continuous(labels = scales::label_bytes(), trans="log2") +
     xlab("message size [KB]") +
@@ -86,20 +87,56 @@ ggplot(sqldf("SELECT * from df where experiment not like '%inline%' AND bytes >=
 
                                         #inline optimization - how to show normalize 
 
-ggplot(sqldf("SELECT * from df WHERE bytes < 512 AND (fabric like '%EFA%' OR fabric like '%IB%')")
+inline = sqldf("SELECT * from df WHERE bytes < 512 AND (fabric like '%EFA%' OR fabric like '%IB%')")
+
+ggplot(inline
       ,aes(x=bytes, y=avg, color=interaction(experiment))) +
     ## geom_point(aes(shape=factor(q)),size=4) +
     geom_point(size=4) +
     geom_line(size=2, alpha=0.8) +
     theme_bw() +
-    facet_grid(fabric ~ .) + 
-    scale_colour_manual(values = wes_palette("Darjeeling1")) +
+    facet_grid(. ~ fabric) + 
+    scale_colour_manual(values = theme) +
     expand_limits(y=0) +
     scale_x_continuous(labels = scales::label_bytes(), trans="log2") +
-    xlab("message size [KB]") +
+    xlab("message size") +
     ylab(expression(paste("Latency [",mu,"s]"))) +
     theme(legend.position="top",
           legend.title=element_blank(),
           text=element_text(size=18),
           legend.margin=margin(0,1,0,0),
           legend.box.margin=margin(-8,-10,-10,-10))
+
+ggsave("inline_optimization.pdf",width=8, height=4, device=cairo_pdf)
+
+
+inline_normalized = read.csv("inline.csv")
+inline_normalized = sqldf("SELECT * FROM inline_normalized WHERE experiment not like '%inline%'") 
+
+inline_normalized[inline_normalized$protocol=="SRD","fabric"] <- "EFA"
+inline_normalized[inline_normalized$protocol=="RC","fabric"] <- "IB"
+
+
+ggplot(inline_normalized
+      ,aes(x=bytes, y=Normalized._Inline, color=interaction(experiment))) +
+    ## geom_point(aes(shape=factor(q)),size=4) +
+    geom_point(size=4) +
+    geom_line(size=2, alpha=0.8) +
+    theme_bw() +
+    facet_grid(fabric ~ .) + 
+    scale_colour_manual(values = c("darkgreen")) +
+    expand_limits(y=0) +
+    scale_x_continuous(labels = scales::label_bytes(), trans="log2") +
+    xlab("message size") +
+    ylab(expression(paste("Normalized Inline Latency"))) +
+    theme(legend.position="none",
+          legend.title=element_blank(),
+          text=element_text(size=18),
+          legend.margin=margin(0,1,0,0),
+          legend.box.margin=margin(-8,-10,-10,-10))
+
+ggsave("inline_optimization_normalized.pdf",width=8, height=4, device=cairo_pdf)
+
+
+
+

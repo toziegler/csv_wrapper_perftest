@@ -9,7 +9,14 @@ library(readr)
 library(dplyr)
 library(gridExtra)
 library(knitr)
+library(unikn)  # load package
 options(scipen=999)
+
+                                        # theme
+
+
+theme =c("#00A08A", "#F98400", "#5BBCD6")
+
 
 df_ib = read.csv("../csv/IB_bw_benchmark.csv", header=TRUE, sep=",", row.names=NULL)
 df_ib$fabric = "IB"
@@ -33,7 +40,8 @@ ggplot(sqldf("SELECT * from df_bw_sync WHERE bytes <= 8192"),aes(x=bytes, y=bwav
     geom_point(size=4) +
     geom_line(size=2, alpha=0.8) +
     theme_bw() +
-    scale_colour_manual(values = wes_palette("Darjeeling1")) +
+    ## scale_colour_manual(values = wes_palette("Darjeeling1")) +
+    scale_colour_manual(values = theme) +
     expand_limits(y=0) +
     scale_x_continuous(labels = scales::label_bytes(), trans="log2") +
     xlab("message size") +
@@ -64,7 +72,7 @@ p_bw = ggplot(sqldf("SELECT * FROM df_bw_tx_depth WHERE cqmoderation=1 and bytes
     geom_line(size=2, alpha=0.8) +
     theme_bw() +
     facet_grid( . ~ bytes) +
-    scale_colour_manual(values = wes_palette("Darjeeling1")) +
+    scale_colour_manual(values = theme) +
     scale_x_continuous(trans="log2") +
     expand_limits(y=0) +
     xlab("tx depth") +
@@ -74,6 +82,9 @@ p_bw = ggplot(sqldf("SELECT * FROM df_bw_tx_depth WHERE cqmoderation=1 and bytes
           text=element_text(size=18),
           legend.margin=margin(0,1,0,0),
           legend.box.margin=margin(-8,-10,-10,-10))
+
+p_bw
+
 ggsave("tx_depth_bw.pdf",width=8, height=4, device=cairo_pdf)
 
 # number of batches 
@@ -83,7 +94,7 @@ p_msgr = ggplot(sqldf("SELECT * FROM df_bw_tx_depth WHERE cqmoderation=1 and byt
     geom_line(size=2, alpha=0.8) +
     theme_bw() +
     facet_grid( . ~ bytes) +
-    scale_colour_manual(values = wes_palette("Darjeeling1")) +
+    scale_colour_manual(values = theme) +
     scale_x_continuous(trans="log2") +
     expand_limits(y=0) +
     xlab("tx depth") +
@@ -93,6 +104,9 @@ p_msgr = ggplot(sqldf("SELECT * FROM df_bw_tx_depth WHERE cqmoderation=1 and byt
           text=element_text(size=18),
           legend.margin=margin(0,1,0,0),
           legend.box.margin=margin(-8,-10,-10,-10))
+
+p_msgr
+
 ggsave("tx_depth_msgrate.pdf",width=8, height=4, device=cairo_pdf)
 
 
@@ -103,7 +117,7 @@ ggplot(sqldf("SELECT * FROM df_bw_tx_depth WHERE txdepth=32 AND bytes=512" ),aes
     geom_line(size=2, alpha=0.8) +
     theme_bw() +
     facet_grid( txdepth ~ bytes) +
-    scale_colour_manual(values = wes_palette("Darjeeling1")) +
+    scale_colour_manual(values = theme) +
     scale_x_continuous(trans="log2") +
     expand_limits(y=0) +
     xlab("cq moderation") +
@@ -122,7 +136,7 @@ ggplot(df_bw_tx_depth,aes(x=cqmoderation, y=bwavg, color=fabric)) +
     geom_line(size=2, alpha=0.8) +
     theme_bw() +
     facet_grid( txdepth ~ bytes) +
-    scale_colour_manual(values = wes_palette("Darjeeling1")) +
+    scale_colour_manual(values = theme) +
     scale_x_continuous(trans="log2") +
     expand_limits(y=0) +
     xlab("cq moderation") +
@@ -141,7 +155,7 @@ ggplot(df_qps,aes(x=numberqps, y=bwavg, color=interaction(fabric,experiment))) +
     geom_line(size=2, alpha=0.8) +
     theme_bw() +
     facet_grid(. ~ bytes) +
-    scale_colour_manual(values = wes_palette("Darjeeling1")) +
+    scale_colour_manual(values = theme) +
     scale_x_continuous(trans="log2") +
     expand_limits(y=0) +
     xlab("number qps") +
@@ -151,7 +165,6 @@ ggplot(df_qps,aes(x=numberqps, y=bwavg, color=interaction(fabric,experiment))) +
           text=element_text(size=18),
           legend.margin=margin(0,1,0,0),
           legend.box.margin=margin(-8,-10,-10,-10))
-
 
 df_qps = sqldf(
 "SELECT *
@@ -169,7 +182,7 @@ ggplot(df_qps,aes(x=numberqps, y=msgrate, color=fabric)) +
     geom_line(size=2, alpha=0.8) +
     theme_bw() +
     facet_grid(. ~ bytes) +
-    scale_colour_manual(values = wes_palette("Darjeeling1")) +
+    scale_colour_manual(values = theme) +
     scale_x_continuous(trans="log2") +
     expand_limits(y=0) +
     xlab("number qps") +
@@ -183,7 +196,7 @@ ggsave("number_qps_msgrate.pdf",width=8, height=4, device=cairo_pdf)
 
 #as table 
 
-df_post = sqldf("SELECT * FROM df where experiment like '%bw_post_list%'")
+df_post = sqldf("SELECT * FROM df where experiment like '%bw_post_list%' AND fabric like '%EFA%'")
 ggplot(df_post,aes(x=postlist, y=msgrate, color=interaction(fabric,experiment))) +
     ## geom_point(aes(shape=factor(q)),size=4) +
     geom_point(size=4) +
