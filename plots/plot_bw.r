@@ -219,6 +219,7 @@ df_qps = sqldf(
 "SELECT *
 FROM df
 WHERE experiment like '%bw_qps'
+AND txdepth =256
 AND (bytes=16
 or bytes=512
 or bytes=4096
