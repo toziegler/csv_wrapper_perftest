@@ -64,11 +64,11 @@ server(){
     #     done
     # done
     
-    # # multiple queues
-    # for i in "${NUMBER_QS[@]}"
-    # do
-    #     run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol} -q ${i}" $sleep # bw  
-    # done
+    # multiple queues
+    for i in "${NUMBER_QS[@]}"
+    do
+        run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol} -q ${i}" $sleep # bw  
+    done
    
     # # post list 
     # for i in "${POST_LIST[@]}"
@@ -90,12 +90,12 @@ server(){
     # done
     
 
-    # tx depth with cq 1 and inline enabled
-    for i in "${TX_DEPTHS[@]}"
-    do
-	    echo "tx depth $i"
-        run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS}  ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw  
-    done
+    # # tx depth with cq 1 and inline enabled
+    # for i in "${TX_DEPTHS[@]}"
+    # do
+	#     echo "tx depth $i"
+    #     run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS}  ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw  
+    # done
 
     
     
@@ -128,10 +128,10 @@ client(){
     # done
     
     # # multiple queues
-    # for i in "${NUMBER_QS[@]}"
-    # do
-    #     run_experiment "bash wrapper_ib_send_bw.sh -e bw_qps -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 128 -m 100 -l 1 -q ${i}" $sleep
-    # done
+    for i in "${NUMBER_QS[@]}"
+    do
+        run_experiment "bash wrapper_ib_send_bw.sh -e bw_qps -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 256 -m 100 -l 1 -q ${i}" $sleep
+    done
     
     # # post list
     # for i in "${POST_LIST[@]}"
@@ -152,12 +152,12 @@ client(){
     #     run_experiment "bash wrapper_ib_send_bw.sh -e bw_post_list_inline -d ${device} -p ${protocol} -c -a ${server_ip} -n 64000 -f ${fabric} -t 128 -m 4 -l ${i} -q 1 -i ${INLINE_SIZE[${fabric}]}" $sleep
     # done
 
-    # tx depth with cq 1 and inline enabled
-    for i in "${TX_DEPTHS[@]}"
-    do
-	    echo "tx depth $i"
-        run_experiment "bash wrapper_ib_send_bw.sh -e bw_tx_depth_inline -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t ${i} -m 1 -l 1 -q 1 -i ${INLINE_SIZE[${fabric}]}" $sleep
-    done
+    # # tx depth with cq 1 and inline enabled
+    # for i in "${TX_DEPTHS[@]}"
+    # do
+	#     echo "tx depth $i"
+    #     run_experiment "bash wrapper_ib_send_bw.sh -e bw_tx_depth_inline -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t ${i} -m 1 -l 1 -q 1 -i ${INLINE_SIZE[${fabric}]}" $sleep
+    # done
 
     
 }
