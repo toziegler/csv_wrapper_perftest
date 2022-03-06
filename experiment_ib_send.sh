@@ -42,8 +42,8 @@ run_experiment(){
 server(){
     sleep=0
 
-    # # latency 
-    # run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F --perform_warm_up -c ${protocol}" $sleep # latency
+    # latency 
+    run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F --perform_warm_up -c ${protocol}" $sleep # latency
 
     # # latency inline
     # run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F --perform_warm_up -c ${protocol}" $sleep # latency
@@ -105,8 +105,8 @@ server(){
 client(){
     sleep=2 # ensures that server starts before client
 
-    # # latency 
-    # run_experiment "bash wrapper_ib_send_lat.sh -e latency -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric}" $sleep
+    # latency 
+    run_experiment "bash wrapper_ib_send_lat.sh -e latency -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric}" $sleep
 
     # # latency inline
     # run_experiment "bash wrapper_ib_send_lat.sh -e latency_inline -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -i ${INLINE_SIZE[${fabric}]}" $sleep
