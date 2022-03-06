@@ -102,7 +102,7 @@ main(){
     echo "server: $server";
     echo "client: $client";
     #--------------------------------------------------
-    FILE="./csv/${fabric}_bw_benchmark.csv"
+    FILE="./csv/${fabric}_bw_benchmark_baremetal_test.csv"
     #--------------------------------------------------
     # client
     if [[ "$client" == 1 ]]; then
