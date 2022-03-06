@@ -90,7 +90,6 @@ ggplot(df_lat_avg ,aes(x=bytes, y=avg, color=system)) +
     expand_limits(y=c(0,52)) +
     scale_x_continuous(labels = scales::label_bytes(), trans="log2") +
     geom_text_repel(aes(label = label), segment.color = 'grey50', show.legend = FALSE, size=5.5, nudge_y=1 ,segment.linetype=0) +  
-    ## geom_label_repel(aes(label = paste(round(a/1e6,2) ,"M Ops","/", round(aggread/1e6,2),4"M IOs")),box.padding = 0.35, point.padding = 0.5, segment.color = 'grey50') +  
     xlab("message size") +
     ylab(expression(paste("latency [",mu,"s]"))) +
     theme(legend.position="top",

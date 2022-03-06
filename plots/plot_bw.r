@@ -333,7 +333,7 @@ p_mt_msgr = ggplot(df_mt,aes(x=thread_count, y=msgrate, color=desc)) +
     scale_x_continuous(trans="log2") +
     expand_limits(y=0) +
     xlab("number threads") +
-    ylab("msg rate [msg/s]") +
+    ylab("msg. rate [msg/s]") +
     theme(legend.position="none",
           legend.title=element_blank(),
           text=element_text(size=22),
