@@ -45,11 +45,11 @@ server(){
     # latency 
     run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F --perform_warm_up -c ${protocol}" $sleep # latency
 
-    # # latency inline
-    # run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F --perform_warm_up -c ${protocol}" $sleep # latency
+    # latency inline
+    run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_lat -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F --perform_warm_up -c ${protocol}" $sleep # latency
 
-    # # sync bw 
-    # run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw
+    # sync bw 
+    run_experiment "numactl --membind=0 taskset -c 0 ${PERFTEST_PATH[${fabric}]}ib_send_bw -a -d ${device} -n ${NUMBER_ITERATIONS} ${ADDITIONAL_FLAGS[${fabric}]} -F -c ${protocol}" $sleep # bw
 
    
     # # Grid search
@@ -106,13 +106,13 @@ client(){
     sleep=2 # ensures that server starts before client
 
     # latency 
-    run_experiment "bash wrapper_ib_send_lat.sh -e latency -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric}" $sleep
+    run_experiment "bash wrapper_ib_send_lat.sh -e baremetal_latency -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric}" $sleep
 
-    # # latency inline
-    # run_experiment "bash wrapper_ib_send_lat.sh -e latency_inline -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -i ${INLINE_SIZE[${fabric}]}" $sleep
+    # latency inline
+    run_experiment "bash wrapper_ib_send_lat.sh -e baremetal_latency_inline -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -i ${INLINE_SIZE[${fabric}]}" $sleep
 
-    # # bw 1 1
-    # run_experiment "bash wrapper_ib_send_bw.sh -e bw_sync -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 1 -m 1 -l 1 -q 1" $sleep
+    # bw 1 1
+    run_experiment "bash wrapper_ib_send_bw.sh -e baremetal_bw_sync -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 1 -m 1 -l 1 -q 1" $sleep
 
     # #Grid Search
     # for i in "${TX_DEPTHS[@]}"
@@ -130,7 +130,7 @@ client(){
     # # multiple queues
     for i in "${NUMBER_QS[@]}"
     do
-        run_experiment "bash wrapper_ib_send_bw.sh -e bw_qps -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 256 -m 100 -l 1 -q ${i}" $sleep
+        run_experiment "bash wrapper_ib_send_bw.sh -e baremetal_bw_qps -d ${device} -p ${protocol} -c -a ${server_ip} -n ${NUMBER_ITERATIONS} -f ${fabric} -t 256 -m 100 -l 1 -q ${i}" $sleep
     done
     
     # # post list
