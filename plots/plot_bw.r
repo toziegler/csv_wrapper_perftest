@@ -54,7 +54,7 @@ ggplot(sqldf("SELECT * from df_bw_sync WHERE bytes <= 8192"),aes(x=bytes, y=bwav
     scale_x_continuous(labels = scales::label_bytes(), trans="log2") +
     xlab("message size") +
     ylab("bandwidth [GB/s]") +
-    theme(legend.position="top",
+    theme(legend.position = c(0.2, 0.8),
           legend.title=element_blank(),
           text=element_text(size=22),
           legend.margin=margin(0,1,0,0),
@@ -100,11 +100,11 @@ p_bw = ggplot(sqldf("SELECT * FROM df_bw_tx_depth WHERE cqmoderation=1 and bytes
     expand_limits(y=0) +
     ## xlab("tx depth [log]") +
     ylab("bandwidth [GB/s]") +
-    theme(legend.position="top",
+    theme(legend.position = c(0.15, 0.8),
           legend.title=element_blank(),
-          text=element_text(size=21),
+          text=element_text(size=20),
           ## legend.margin=margin(0,1,0,0),
-          axis.title.x=element_blank())
+          axis.title.x=element_blank(),
           axis.text.x = element_text(size = 16))
           ## legend.box.margin=margin(-5,-5,-5,-5))
 
@@ -127,7 +127,7 @@ p_msgr = ggplot(sqldf("SELECT * FROM df_bw_tx_depth WHERE cqmoderation=1 and byt
     scale_x_continuous(trans="log2",breaks=c(8,128,2048), labels = c("8","128","2k")) +
     scale_y_continuous(labels = scales::label_number_si()) +
     expand_limits(y=0) +
-    xlab("transmit depth [log]") +
+    xlab("outstanding requests [log]") +
     ylab("msg. rate [msg/s]") +
     theme(legend.position="none",
           legend.title=element_blank(),
@@ -142,6 +142,9 @@ ggsave("tx_depth_msgrate.pdf",width=8, height=3, device=cairo_pdf)
 
 
 library(gtable)
+library(grid) # for unit.pmax()
+library(gridExtra)
+
 g2 <- ggplotGrob(p_bw)
 g3 <- ggplotGrob(p_msgr)
 g <- rbind(g2, g3, size = "first")
@@ -249,7 +252,7 @@ ggplot(df_qps,aes(x=numberqps, y=msgrate*1e6, color=desc)) +
     expand_limits(y=0) +
     xlab("number connections (send queues)") +
     ylab("msg. rate [msg/s]") +
-    theme(legend.position="top",
+    theme(legend.position=c(0.8,0.8),
           legend.title=element_blank(),
           text=element_text(size=22),
           legend.margin=margin(0,1,0,0),
@@ -453,7 +456,7 @@ lib_mr = ggplot(df_compare,aes(x=Size, y=MessageRate/1e6, color=library)) +
     expand_limits(y=0) +
     xlab("message size") +
     ylab("msg. rate [msg/s]") +
-    theme(legend.position="none",
+    theme(legend.position=c(0.2,0.3),
           legend.title=element_blank(),
           text=element_text(size=22),
           legend.margin=margin(0,1,0,0),
